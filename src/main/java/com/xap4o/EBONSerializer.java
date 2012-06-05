@@ -10,7 +10,7 @@ public class EBONSerializer {
     private ByteBuffer buf = ByteBuffer.allocate(1024 * 100);
 
     public byte[] serialize(Object doc) {
-        writeDocument(doc);
+        writeValue(doc);
         buf.flip();
         byte[] result = new byte[buf.remaining()];
         buf.get(result, 0, result.length);
@@ -69,10 +69,10 @@ public class EBONSerializer {
             } else {
                 throw new EBONException("Cannot serialize array of " + clazz.getComponentType());
             }
-        } else if (clazz == List.class) {
+        } else if (List.class.isAssignableFrom(clazz)) {
             buf.put(EBON.C_LIST);
             writeList((List) value);
-        } else if (clazz == Map.class) {
+        } else if (Map.class.isAssignableFrom(clazz)) {
             buf.put(EBON.C_MAP);
             writeMap((Map<String, Object>) value);
         } else {

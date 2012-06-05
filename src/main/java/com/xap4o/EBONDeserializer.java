@@ -14,7 +14,7 @@ public class EBONDeserializer {
         buf = ByteBuffer.wrap(bytes);
         buf.put(bytes);
         buf.rewind();
-        return readDocument();
+        return readValue();
     }
 
     private Object readValue() {

@@ -2,18 +2,70 @@ package com.xap4o;
 
 import org.junit.Test;
 
+import java.util.*;
+
 import static junit.framework.Assert.assertEquals;
 
 public class BasicTest {
     @Test
-    public void testSimple() {
+    public void testInt() {
+        Integer a = 1;
+        Integer b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testLong() {
+        Long a = (long) (Math.random() * Long.MIN_VALUE);
+        Long b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testDouble() {
+        Double a = Math.random() * Double.MAX_VALUE;
+        Double b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testString() {
+        String a = "quick brown fox jumps over the lazy dog";
+        String b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testList() {
+        List a = Arrays.asList(1, "abc", -3.2, 4L);
+        List b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a.size(), b.size());
+        for (int i = 0; i < a.size(); i++) {
+            assertEquals(a.get(i), b.get(i));
+        }
+    }
+
+    @Test
+    public void testMap() {
+        Map<String, Object> a = new HashMap<String, Object>();
+        a.put("", 1);
+        a.put("abc", "foo-bar-baz");
+        a.put("some key", Arrays.asList("abc", 90, 0.99999));
+        Map<String, Object> b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a.size(), b.size());
+        for (String key : a.keySet()) {
+            assertEquals(a.get(key), b.get(key));
+        }
+    }
+
+    @Test
+    public void testDocument() {
         Foo f = new Foo();
         f.a = 2;
         f.bar = Long.MAX_VALUE;
         f.c = true;
         f.stringField = "some string";
-        byte[] bytes = EBON.serialize(f);
-        Foo newF = EBON.deserialize(bytes);
+        Foo newF = EBON.deserialize(EBON.serialize(f));
         assertEquals(f.a, newF.a);
         assertEquals(f.bar, newF.bar);
         assertEquals(f.c, newF.c);
@@ -30,8 +82,7 @@ public class BasicTest {
         b1.ref.a = -100;
         b1.ref2 = new Bar();
         b1.ref2.d = 1;
-        byte[] bytes = EBON.serialize(b1);
-        Bar b2 = EBON.deserialize(bytes);
+        Bar b2 = EBON.deserialize(EBON.serialize(b1));
         assertEquals(b1, b2);
     }
 
