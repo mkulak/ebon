@@ -22,6 +22,7 @@ public class Reflector {
             return acc;
         }
         for (Field f : clazz.getDeclaredFields()) {
+            f.setAccessible(true);
             acc.put(f.getName(), f);
         }
         return getFields(clazz.getSuperclass(), acc);

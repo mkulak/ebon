@@ -2,6 +2,9 @@ package com.xap4o;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class EBONDeserializer {
@@ -14,8 +17,9 @@ public class EBONDeserializer {
         return readDocument();
     }
 
-    private Object readValue(byte valType) {
-        switch(valType) {
+    private Object readValue() {
+        byte valType = buf.get();
+        switch (valType) {
             case EBON.C_NULL:
                 return null;
             case EBON.C_BOOLEAN:
@@ -28,8 +32,12 @@ public class EBONDeserializer {
                 return buf.getDouble();
             case EBON.C_STRING:
                 return readString();
-            case EBON.C_BYTES:
+            case EBON.C_BINARY:
                 return readByteArray();
+            case EBON.C_LIST:
+                return readList();
+            case EBON.C_MAP:
+                return readMap();
             case EBON.C_DOCUMENT:
                 return readDocument();
         }
@@ -38,12 +46,12 @@ public class EBONDeserializer {
 
     private Object readDocument() {
         String className = readString();
+        int fieldsCount = buf.getInt();
         Object res = Reflector.newInstance(className);
-        Map<String,Field> name2field = Reflector.getFields(res.getClass());
-        while (buf.hasRemaining()) {
+        Map<String, Field> name2field = Reflector.getFields(res.getClass());
+        for (int i = 0; i < fieldsCount; i++) {
             String name = readString();
-            byte valType = buf.get();
-            Object value = readValue(valType);
+            Object value = readValue();
             try {
                 name2field.get(name).set(res, value);
             } catch (Exception e) {
@@ -67,5 +75,24 @@ public class EBONDeserializer {
         byte[] bytes = new byte[size];
         buf.get(bytes);
         return bytes;
+    }
+
+    private Map<String, Object> readMap() {
+        int size = buf.getInt();
+        Map<String, Object> res = new HashMap<String, Object>();
+        for (int i = 0; i < size; i++) {
+            String key = readString();
+            res.put(key, readValue());
+        }
+        return res;
+    }
+
+    private List readList() {
+        int size = buf.getInt();
+        List res = new ArrayList();
+        for (int i = 0; i < size; i++) {
+            res.add(readValue());
+        }
+        return res;
     }
 }

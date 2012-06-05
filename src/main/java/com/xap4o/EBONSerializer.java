@@ -1,7 +1,9 @@
 package com.xap4o;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
 
 public class EBONSerializer {
@@ -15,19 +17,10 @@ public class EBONSerializer {
         return result;
     }
 
-    private void writeString(String str) {
-        try {
-            byte[] bytes = str.getBytes("UTF-8");
-            buf.putInt(bytes.length);
-            buf.put(bytes);
-        } catch (Exception e) {
-            throw new EBONException("", e);
-        }
-    }
-
     private void writeDocument(Object doc) {
         writeString(doc.getClass().getName());
         Map<String,Field> fieldsMap = Reflector.getFields(doc.getClass());
+        buf.putInt(fieldsMap.size());
         for (Map.Entry<String, Field> e : fieldsMap.entrySet()) {
             writeString(e.getKey());
             try {
@@ -35,6 +28,16 @@ public class EBONSerializer {
             } catch (Exception ex) {
                 throw new EBONException("", ex);
             }
+        }
+    }
+
+    private void writeString(String str) {
+        try {
+            byte[] bytes = str.getBytes("UTF-8");
+            buf.putInt(bytes.length);
+            buf.put(bytes);
+        } catch (Exception e) {
+            throw new EBONException("", e);
         }
     }
 
@@ -46,23 +49,55 @@ public class EBONSerializer {
         Class<?> clazz = value.getClass();
         if (clazz == Boolean.class) {
             buf.put(EBON.C_BOOLEAN);
-            buf.put(((Boolean) value).booleanValue() ? (byte) 1 : (byte) 0);
+            buf.put((Boolean) value ? (byte) 1 : (byte) 0);
         } else if (clazz == Integer.class) {
             buf.put(EBON.C_INT);
-            buf.putInt((((Integer) value)).intValue());
+            buf.putInt((Integer) value);
         } else if (clazz == Long.class) {
             buf.put(EBON.C_LONG);
-            buf.putLong((((Long) value)).longValue());
+            buf.putLong((Long) value);
         } else if (clazz == Double.class) {
             buf.put(EBON.C_DOUBLE);
-            buf.putDouble((((Double) value)).doubleValue());
+            buf.putDouble((Double) value);
         } else if (clazz == String.class) {
             buf.put(EBON.C_STRING);
             writeString((String) value);
+        } else if (clazz.isArray()) {
+            if (clazz.getComponentType() == byte.class) {
+                buf.put(EBON.C_BINARY);
+                writeByteArray((byte[]) value);
+            } else {
+                throw new EBONException("Cannot serialize array of " + clazz.getComponentType());
+            }
+        } else if (clazz == List.class) {
+            buf.put(EBON.C_LIST);
+            writeList((List) value);
+        } else if (clazz == Map.class) {
+            buf.put(EBON.C_MAP);
+            writeMap((Map<String, Object>) value);
         } else {
             buf.put(EBON.C_DOCUMENT);
             writeDocument(value);
         }
     }
 
+    private void writeMap(Map<String, Object> value) {
+        buf.putInt(value.size());
+        for (Map.Entry<String, Object> e : value.entrySet()) {
+            writeString(e.getKey());
+            writeValue(e.getValue());
+        }
+    }
+
+    private void writeList(List value) {
+        buf.putInt(value.size());
+        for (Object elem : value) {
+            writeValue(elem);
+        }
+    }
+
+    private void writeByteArray(byte[] value) {
+        buf.putInt(Array.getLength(value));
+        buf.put((byte[]) value);
+    }
 }

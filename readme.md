@@ -1,20 +1,16 @@
-EBON (e binary object notation) - format which describes binary encoded documents (much like BSON but without MongoDb stuff).
+EBON (elementary binary object notation) - format which describes binary encoded documents (much like BSON but without MongoDb stuff).
+This is very early draft, specification is subject to change with no backward compatibility.
 
-document = type list
-list = element list | nothing
-element = name \x01 boolean
-        | name \x02 int
-        | name \x03 long
-        | name \x04 double
-        | name \x05 string
-        | name \x06 array
-        | name \x07 document
-        | name \x08 bytes
-        | ref  \x09
+Spec:
+TODO
 
-int = <4 big-endian bytes>
-name = string
-string = int <utf-8 encoded bytes>
-array = int <elements>
-bytes = int <bytes>
-ref = int
+Serialization/deserialization is that simple:
+    MyObject obj = ...
+    byte[] bytes = EBON.serialize(obj);
+    MyObject newObj = EBON.deserialize(bytes);
+
+Limitations:
+    Serialized objects may contain only boolean/int/long/double/String/Map/List fields
+    All maps should contain String as a key
+    No enums support
+    No arrays support (except byte[])

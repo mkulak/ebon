@@ -7,9 +7,9 @@ public class EBON {
     public static final byte C_LONG = 3;
     public static final byte C_DOUBLE = 4;
     public static final byte C_STRING = 5;
-    public static final byte C_ARRAY = 6;
+    public static final byte C_LIST = 6;
     public static final byte C_DOCUMENT = 7;
-    public static final byte C_BYTES = 8;
+    public static final byte C_BINARY = 8;
     public static final byte C_MAP = 9;
 
 
