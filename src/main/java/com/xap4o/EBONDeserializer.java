@@ -40,8 +40,21 @@ public class EBONDeserializer {
                 return readMap();
             case EBON.C_DOCUMENT:
                 return readDocument();
+            case EBON.C_ENUM:
+                return readEnum();
         }
-        return new EBONException("Unsupported type: " + valType);
+        throw new EBONException("Unsupported type: " + valType);
+    }
+
+    private Object readEnum() {
+        String clazzName = readString();
+        String name = readString();
+        try {
+            Class enumClass = Class.forName(clazzName);
+            return Enum.valueOf(enumClass, name);
+        } catch (ClassNotFoundException e) {
+            throw new EBONException("No enum class " + clazzName);
+        }
     }
 
     private Object readDocument() {

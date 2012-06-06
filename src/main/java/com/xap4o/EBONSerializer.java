@@ -75,10 +75,18 @@ public class EBONSerializer {
         } else if (Map.class.isAssignableFrom(clazz)) {
             buf.put(EBON.C_MAP);
             writeMap((Map<String, Object>) value);
+        } else if (clazz.isEnum()) {
+            buf.put(EBON.C_ENUM);
+            writeEnum((Enum) value);
         } else {
             buf.put(EBON.C_DOCUMENT);
             writeDocument(value);
         }
+    }
+
+    private void writeEnum(Enum value) {
+        writeString(value.getClass().getName());
+        writeString(value.name());
     }
 
     private void writeMap(Map<String, Object> value) {

@@ -5,6 +5,7 @@ import org.junit.Test;
 import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertSame;
 
 public class BasicTest {
     @Test
@@ -71,6 +72,13 @@ public class BasicTest {
         assertEquals(f.c, newF.c);
         assertEquals(f.stringField, newF.stringField);
         assertEquals(f.objField, newF.objField);
+    }
+
+    @Test
+    public void testEnum() {
+        TestEnum a = TestEnum.CONST_NAME_1;
+        TestEnum b = EBON.deserialize(EBON.serialize(a));
+        assertSame(a, b);
     }
 
     @Test
@@ -152,5 +160,10 @@ public class BasicTest {
             result = 31 * result + (ref2 != null ? ref2.hashCode() : 0);
             return result;
         }
+    }
+
+    public static enum TestEnum {
+        CONST_NAME_1,
+        CONST_NAME_2
     }
 }
