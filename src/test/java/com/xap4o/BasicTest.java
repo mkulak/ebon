@@ -61,7 +61,7 @@ public class BasicTest {
     }
 
     @Test
-    public void testDocument() {
+    public void testCustomClass() {
         Foo f = new Foo();
         f.a = 2;
         f.bar = Long.MAX_VALUE;

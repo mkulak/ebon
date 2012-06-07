@@ -38,8 +38,8 @@ public class EBONDeserializer {
                 return readList();
             case EBON.C_MAP:
                 return readMap();
-            case EBON.C_DOCUMENT:
-                return readDocument();
+            case EBON.C_OBJECT:
+                return readObject();
             case EBON.C_ENUM:
                 return readEnum();
         }
@@ -57,7 +57,7 @@ public class EBONDeserializer {
         }
     }
 
-    private Object readDocument() {
+    private Object readObject() {
         String className = readString();
         int fieldsCount = buf.getInt();
         Object res = Reflector.newInstance(className);

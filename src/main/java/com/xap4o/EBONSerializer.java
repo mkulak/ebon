@@ -17,7 +17,7 @@ public class EBONSerializer {
         return result;
     }
 
-    private void writeDocument(Object doc) {
+    private void writeObject(Object doc) {
         writeString(doc.getClass().getName());
         Map<String,Field> fieldsMap = Reflector.getFields(doc.getClass());
         int pos = buf.position();
@@ -85,8 +85,8 @@ public class EBONSerializer {
             buf.put(EBON.C_ENUM);
             writeEnum((Enum) value);
         } else {
-            buf.put(EBON.C_DOCUMENT);
-            writeDocument(value);
+            buf.put(EBON.C_OBJECT);
+            writeObject(value);
         }
     }
 
