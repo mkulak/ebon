@@ -5,6 +5,7 @@ import org.junit.Test;
 import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertSame;
 
 public class BasicTest {
@@ -79,6 +80,18 @@ public class BasicTest {
         TestEnum a = TestEnum.CONST_NAME_1;
         TestEnum b = EBON.deserialize(EBON.serialize(a));
         assertSame(a, b);
+    }
+
+    @Test
+    public void testSkip() {
+        TestSkip a = new TestSkip();
+        a.string1 = "john";
+        a.string2 = "12345";
+        a.string3 = "   ";
+        TestSkip b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a.string1, b.string1);
+        assertNull(b.string2);
+        assertEquals(a.string3, b.string3);
     }
 
     @Test
@@ -165,5 +178,12 @@ public class BasicTest {
     public static enum TestEnum {
         CONST_NAME_1,
         CONST_NAME_2
+    }
+
+    public static class TestSkip {
+        public String string1;
+        @Skip
+        public String string2;
+        public String string3;
     }
 }

@@ -20,15 +20,21 @@ public class EBONSerializer {
     private void writeDocument(Object doc) {
         writeString(doc.getClass().getName());
         Map<String,Field> fieldsMap = Reflector.getFields(doc.getClass());
-        buf.putInt(fieldsMap.size());
+        int pos = buf.position();
+        buf.putInt(0);//to reserve space for actual fieldsCount value
+        int fieldsCount = 0;
         for (Map.Entry<String, Field> e : fieldsMap.entrySet()) {
-            writeString(e.getKey());
-            try {
-                writeValue(e.getValue().get(doc));
-            } catch (Exception ex) {
-                throw new EBONException("", ex);
+            if (e.getValue().getAnnotation(Skip.class) == null) {
+                writeString(e.getKey());
+                try {
+                    writeValue(e.getValue().get(doc));
+                } catch (Exception ex) {
+                    throw new EBONException("", ex);
+                }
+                fieldsCount++;
             }
         }
+        buf.putInt(pos, fieldsCount);
     }
 
     private void writeString(String str) {
