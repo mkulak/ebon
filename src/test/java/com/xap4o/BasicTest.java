@@ -95,6 +95,16 @@ public class BasicTest {
     }
 
     @Test
+    public void testGetterAndSetter() {
+        TestGetter a = new TestGetter();
+        a.field1 = "0xcafebabe";
+        a.foo = 47;
+        TestGetter b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a.field1, b.field1);
+        assertEquals(a.foo, b.foo);
+    }
+
+    @Test
     public void testInnerObjects() {
         Bar b1 = new Bar();
         b1.d = Integer.MAX_VALUE;
@@ -186,4 +196,20 @@ public class BasicTest {
         public String string2;
         public String string3;
     }
+
+    public static class TestGetter{
+        public String field1;
+        @Skip
+        public int foo;
+
+        @Getter("baz")
+        public int someMethod() {
+            return foo + 10;
+        }
+        @Setter("baz")
+        public void someOtherMethod(int value) {
+            foo = value - 10;
+        }
+    }
+
 }

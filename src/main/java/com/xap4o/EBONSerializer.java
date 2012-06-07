@@ -2,6 +2,7 @@ package com.xap4o;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ public class EBONSerializer {
 
     private void writeObject(Object doc) {
         writeString(doc.getClass().getName());
-        Map<String,Field> fieldsMap = Reflector.getFields(doc.getClass());
+        Map<String, Field> fieldsMap = Reflector.getFields(doc.getClass());
         int pos = buf.position();
         buf.putInt(0);//to reserve space for actual fieldsCount value
         int fieldsCount = 0;
@@ -28,6 +29,18 @@ public class EBONSerializer {
                 writeString(e.getKey());
                 try {
                     writeValue(e.getValue().get(doc));
+                } catch (Exception ex) {
+                    throw new EBONException("", ex);
+                }
+                fieldsCount++;
+            }
+        }
+        Map<String, Method> gettersMap = Reflector.getGetters(doc.getClass());
+        for (Map.Entry<String, Method> e : gettersMap.entrySet()) {
+            if (e.getValue().getAnnotation(Skip.class) == null) {
+                writeString(e.getKey());
+                try {
+                    writeValue(e.getValue().invoke(doc));
                 } catch (Exception ex) {
                     throw new EBONException("", ex);
                 }

@@ -1,6 +1,7 @@
 package com.xap4o;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,11 +63,22 @@ public class EBONDeserializer {
         int fieldsCount = buf.getInt();
         Object res = Reflector.newInstance(className);
         Map<String, Field> name2field = Reflector.getFields(res.getClass());
+        Map<String, Method> name2setter = Reflector.getSetters(res.getClass());
         for (int i = 0; i < fieldsCount; i++) {
             String name = readString();
             Object value = readValue();
             try {
-                name2field.get(name).set(res, value);
+                Method method = name2setter.get(name);
+                Field field = name2field.get(name);
+                if (method != null) {
+                    method.invoke(res, value);
+                } else if (field != null) {
+                    field.set(res, value);
+                } else {
+                    throw new EBONException("Cannot set field " + name + " for clazz " + className);
+                }
+            } catch (EBONException e) {
+                throw e;
             } catch (Exception e) {
                 throw new EBONException("Cannot set field " + name + " for clazz " + className, e);
             }
