@@ -32,6 +32,5 @@ Serialization/deserialization is that simple:
 
 
 Limitations:
-* Serialized objects may contain only boolean/int/long/double/String/Map/List/enum fields
-* All maps should contain String as a key
+* Serialized objects may contain only fields of type boolean/int/long/double/String/List/Map/enum
 * No arrays support (except byte[])

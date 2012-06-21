@@ -93,7 +93,7 @@ public class EBONSerializer {
             writeList((List) value);
         } else if (Map.class.isAssignableFrom(clazz)) {
             buf.put(EBON.C_MAP);
-            writeMap((Map<String, Object>) value);
+            writeMap((Map<Object, Object>) value);
         } else if (clazz.isEnum()) {
             buf.put(EBON.C_ENUM);
             writeEnum((Enum) value);
@@ -108,10 +108,10 @@ public class EBONSerializer {
         writeString(value.name());
     }
 
-    private void writeMap(Map<String, Object> value) {
+    private void writeMap(Map<Object, Object> value) {
         buf.putInt(value.size());
-        for (Map.Entry<String, Object> e : value.entrySet()) {
-            writeString(e.getKey());
+        for (Map.Entry<Object, Object> e : value.entrySet()) {
+            writeValue(e.getKey());
             writeValue(e.getValue());
         }
     }
@@ -124,7 +124,7 @@ public class EBONSerializer {
     }
 
     private void writeByteArray(byte[] value) {
-        buf.putInt(Array.getLength(value));
-        buf.put((byte[]) value);
+        buf.putInt(value.length);
+        buf.put(value);
     }
 }

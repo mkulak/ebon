@@ -49,13 +49,15 @@ public class BasicTest {
 
     @Test
     public void testMap() {
-        Map<String, Object> a = new HashMap<String, Object>();
+        Map<Object, Object> a = new HashMap<Object, Object>();
         a.put("", 1);
         a.put("abc", "foo-bar-baz");
         a.put("some key", Arrays.asList("abc", 90, 0.99999));
-        Map<String, Object> b = EBON.deserialize(EBON.serialize(a));
+        a.put(42, "string value");
+        a.put(76L, 0);
+        Map<Object, Object> b = EBON.deserialize(EBON.serialize(a));
         assertEquals(a.size(), b.size());
-        for (String key : a.keySet()) {
+        for (Object key : a.keySet()) {
             assertEquals(a.get(key), b.get(key));
         }
     }

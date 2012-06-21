@@ -102,11 +102,11 @@ public class EBONDeserializer {
         return bytes;
     }
 
-    private Map<String, Object> readMap() {
+    private Map<Object, Object> readMap() {
         int size = buf.getInt();
-        Map<String, Object> res = new HashMap<String, Object>();
+        Map<Object, Object> res = new HashMap<Object, Object>();
         for (int i = 0; i < size; i++) {
-            String key = readString();
+            Object key = readValue();
             res.put(key, readValue());
         }
         return res;
