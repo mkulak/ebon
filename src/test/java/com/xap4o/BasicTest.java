@@ -119,6 +119,15 @@ public class BasicTest {
         assertEquals(b1, b2);
     }
 
+    @Test
+    public void testLoops() {
+        Node<Integer> child1 = new Node<Integer>(1);
+        Node<Integer> child2 = new Node<Integer>(2);
+        Node<Integer> parent = new Node<Integer>(0, child1, child2);
+        Node<Integer> newParent = EBON.deserialize(EBON.serialize(parent));
+        assertEquals(parent, newParent);
+    }
+
     public static class Foo {
         public int a;
         public long bar;
@@ -211,6 +220,53 @@ public class BasicTest {
         @Setter("baz")
         public void someOtherMethod(int value) {
             foo = value - 10;
+        }
+    }
+
+    public static class Node<T> {
+        public List<Node> children = new LinkedList<Node>();
+        public T value;
+        public Node parent;
+
+        public Node() {
+        }
+
+        public Node(T value) {
+            this.value = value;
+        }
+
+        public Node(T value, Node... childs) {
+            this.value = value;
+            for (Node n : childs) {
+                n.parent = this;
+                children.add(n);
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Node)) {
+                return false;
+            }
+            Node<T> other = (Node<T>) o;
+            Iterator<Node> it1 = children.iterator();
+            Iterator<Node> it2 = other.children.iterator();
+            while(it1.hasNext() && it2.hasNext()) {
+                if (!it1.next().equals(it2.next())) {
+                    return false;
+                }
+            }
+            if (it1.hasNext() != it2.hasNext()) {
+                return false;
+            }
+            return value == other.value || (value != null && value.equals(other.value));
+        }
+
+        @Override
+        public int hashCode() {
+            int result = children.hashCode();
+            result = 31 * result + (value != null ? value.hashCode() : 0);
+            return result;
         }
     }
 

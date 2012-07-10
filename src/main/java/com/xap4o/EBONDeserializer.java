@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class EBONDeserializer {
     private ByteBuffer buf;
+    private Map<Integer, Object> refMap = new HashMap<Integer, Object>();
 
     public Object deserialize(byte[] bytes) {
         buf = ByteBuffer.wrap(bytes);
@@ -32,7 +33,7 @@ public class EBONDeserializer {
             case EBON.C_DOUBLE:
                 return buf.getDouble();
             case EBON.C_STRING:
-                return readString();
+                return readStringImpl();
             case EBON.C_BINARY:
                 return readByteArray();
             case EBON.C_LIST:
@@ -43,8 +44,19 @@ public class EBONDeserializer {
                 return readObject();
             case EBON.C_ENUM:
                 return readEnum();
+            case EBON.C_REF:
+                return readRef();
         }
         throw new EBONException("Unsupported type: " + valType);
+    }
+
+    private Object readRef() {
+        int ref = buf.getInt();
+        Object res = refMap.get(ref);
+        if (res == null) {
+            throw new EBONException("Malformed ref " + ref);
+        }
+        return res;
     }
 
     private Object readEnum() {
@@ -59,9 +71,11 @@ public class EBONDeserializer {
     }
 
     private Object readObject() {
+        int ref = buf.getInt();
         String className = readString();
         int fieldsCount = buf.getInt();
         Object res = Reflector.newInstance(className);
+        refMap.put(ref, res);
         Map<String, Field> name2field = Reflector.getFields(res.getClass());
         Map<String, Method> name2setter = Reflector.getSetters(res.getClass());
         for (int i = 0; i < fieldsCount; i++) {
@@ -87,24 +101,46 @@ public class EBONDeserializer {
     }
 
     private String readString() {
-        byte[] bytes = readByteArray();
-        try {
-            return new String(bytes, "UTF-8");
-        } catch (Exception e) {
-            throw new EBONException("", e);
+        byte valType = buf.get();
+        switch (valType) {
+            case EBON.C_STRING:
+                return readStringImpl();
+            case EBON.C_REF:
+                return (String) readRef();
+            default:
+                throw new EBONException("Expected string, found " + valType);
         }
     }
 
-    private byte[] readByteArray() {
+    private String readStringImpl() {
+        int ref = buf.getInt();
         int size = buf.getInt();
         byte[] bytes = new byte[size];
         buf.get(bytes);
+        String res;
+        try {
+            res = new String(bytes, "UTF-8");
+        } catch (Exception e) {
+            throw new EBONException("", e);
+        }
+        refMap.put(ref, res);
+        return res;
+    }
+
+    private byte[] readByteArray() {
+        int ref = buf.getInt();
+        int size = buf.getInt();
+        byte[] bytes = new byte[size];
+        buf.get(bytes);
+        refMap.put(ref, bytes);
         return bytes;
     }
 
     private Map<Object, Object> readMap() {
+        int ref = buf.getInt();
         int size = buf.getInt();
         Map<Object, Object> res = new HashMap<Object, Object>();
+        refMap.put(ref, res);
         for (int i = 0; i < size; i++) {
             Object key = readValue();
             res.put(key, readValue());
@@ -113,8 +149,10 @@ public class EBONDeserializer {
     }
 
     private List readList() {
+        int ref = buf.getInt();
         int size = buf.getInt();
         List res = new ArrayList();
+        refMap.put(ref, res);
         for (int i = 0; i < size; i++) {
             res.add(readValue());
         }

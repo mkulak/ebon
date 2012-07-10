@@ -1,11 +1,11 @@
 EBON (efficient binary object notation)
 =======================================
 
-Library for serializing/deserializing object trees in simple binary format (much like BSON but without MongoDb stuff).
+Library for serializing/deserializing object graphs in simple binary format (much like BSON but without MongoDb stuff).
 
 This is very early draft. Specification is subject to change with no backward compatibility.
 
-At this time only java version is available. Actionscript will be supported soon.
+Actionscript implementation is [here](https://github.com/mkulak/ebon-as).
 
 Spec:
 TODO
@@ -31,6 +31,12 @@ Serialization/deserialization is that simple:
     MyObjectTree newObj = EBON.deserialize(bytes);
 
 
+Features:
+* dead simple spec and API
+* no external dependencies (just standard library)
+* can serialize graphs
+* java/actionscript support
+* no dinosaur legacy code
+
 Limitations:
-* Serialized objects may contain only fields of type boolean/int/long/double/String/List/Map/enum
-* No arrays support (except byte[])
+* Serialized objects must not contain array fields (except byte[])

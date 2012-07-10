@@ -4,11 +4,14 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class EBONSerializer {
     private ByteBuffer buf = ByteBuffer.allocate(1024 * 100);
+    private Map<Object, Integer> refMap = new IdentityHashMap<Object, Integer>();
+    private int nextRef;
 
     public byte[] serialize(Object doc) {
         writeValue(doc);
@@ -18,51 +21,15 @@ public class EBONSerializer {
         return result;
     }
 
-    private void writeObject(Object doc) {
-        writeString(doc.getClass().getName());
-        Map<String, Field> fieldsMap = Reflector.getFields(doc.getClass());
-        int pos = buf.position();
-        buf.putInt(0);//to reserve space for actual fieldsCount value
-        int fieldsCount = 0;
-        for (Map.Entry<String, Field> e : fieldsMap.entrySet()) {
-            if (e.getValue().getAnnotation(Skip.class) == null) {
-                writeString(e.getKey());
-                try {
-                    writeValue(e.getValue().get(doc));
-                } catch (Exception ex) {
-                    throw new EBONException("", ex);
-                }
-                fieldsCount++;
-            }
-        }
-        Map<String, Method> gettersMap = Reflector.getGetters(doc.getClass());
-        for (Map.Entry<String, Method> e : gettersMap.entrySet()) {
-            if (e.getValue().getAnnotation(Skip.class) == null) {
-                writeString(e.getKey());
-                try {
-                    writeValue(e.getValue().invoke(doc));
-                } catch (Exception ex) {
-                    throw new EBONException("", ex);
-                }
-                fieldsCount++;
-            }
-        }
-        buf.putInt(pos, fieldsCount);
-    }
-
-    private void writeString(String str) {
-        try {
-            byte[] bytes = str.getBytes("UTF-8");
-            buf.putInt(bytes.length);
-            buf.put(bytes);
-        } catch (Exception e) {
-            throw new EBONException("", e);
-        }
-    }
-
     private void writeValue(Object value) {
         if (value == null) {
             buf.put(EBON.C_NULL);
+            return;
+        }
+        Integer ref = refMap.get(value);
+        if (ref != null) {
+            buf.put(EBON.C_REF);
+            buf.putInt(ref);
             return;
         }
         Class<?> clazz = value.getClass();
@@ -79,36 +46,86 @@ public class EBONSerializer {
             buf.put(EBON.C_DOUBLE);
             buf.putDouble((Double) value);
         } else if (clazz == String.class) {
-            buf.put(EBON.C_STRING);
             writeString((String) value);
         } else if (clazz.isArray()) {
             if (clazz.getComponentType() == byte.class) {
-                buf.put(EBON.C_BINARY);
                 writeByteArray((byte[]) value);
             } else {
                 throw new EBONException("Cannot serialize array of " + clazz.getComponentType());
             }
         } else if (List.class.isAssignableFrom(clazz)) {
-            buf.put(EBON.C_LIST);
             writeList((List) value);
         } else if (Map.class.isAssignableFrom(clazz)) {
-            buf.put(EBON.C_MAP);
             writeMap((Map<Object, Object>) value);
         } else if (clazz.isEnum()) {
-            buf.put(EBON.C_ENUM);
             writeEnum((Enum) value);
         } else {
-            buf.put(EBON.C_OBJECT);
             writeObject(value);
         }
     }
 
+    private void writeString(String str) {
+        Integer ref = refMap.get(str);
+        if (ref != null) {
+            buf.put(EBON.C_REF);
+            buf.putInt(ref);
+        } else {
+            byte[] bytes;
+            try {
+                bytes = str.getBytes("UTF-8");
+            } catch (Exception e) {
+                throw new EBONException("", e);
+            }
+            buf.put(EBON.C_STRING);
+            buf.putInt(saveRef(str));
+            buf.putInt(bytes.length);
+            buf.put(bytes);
+        }
+    }
+
+    private void writeObject(Object obj) {
+        buf.put(EBON.C_OBJECT);
+        buf.putInt(saveRef(obj));
+        writeString(obj.getClass().getName());
+        Map<String, Field> fieldsMap = Reflector.getFields(obj.getClass());
+        int pos = buf.position();
+        buf.putInt(0);//to reserve space for actual fieldsCount value
+        int fieldsCount = 0;
+        for (Map.Entry<String, Field> e : fieldsMap.entrySet()) {
+            if (e.getValue().getAnnotation(Skip.class) == null) {
+                writeString(e.getKey());
+                try {
+                    writeValue(e.getValue().get(obj));
+                } catch (Exception ex) {
+                    throw new EBONException("", ex);
+                }
+                fieldsCount++;
+            }
+        }
+        Map<String, Method> gettersMap = Reflector.getGetters(obj.getClass());
+        for (Map.Entry<String, Method> e : gettersMap.entrySet()) {
+            if (e.getValue().getAnnotation(Skip.class) == null) {
+                writeString(e.getKey());
+                try {
+                    writeValue(e.getValue().invoke(obj));
+                } catch (Exception ex) {
+                    throw new EBONException("", ex);
+                }
+                fieldsCount++;
+            }
+        }
+        buf.putInt(pos, fieldsCount);
+    }
+
     private void writeEnum(Enum value) {
+        buf.put(EBON.C_ENUM);
         writeString(value.getClass().getName());
         writeString(value.name());
     }
 
     private void writeMap(Map<Object, Object> value) {
+        buf.put(EBON.C_MAP);
+        buf.putInt(saveRef(value));
         buf.putInt(value.size());
         for (Map.Entry<Object, Object> e : value.entrySet()) {
             writeValue(e.getKey());
@@ -117,6 +134,8 @@ public class EBONSerializer {
     }
 
     private void writeList(List value) {
+        buf.put(EBON.C_LIST);
+        buf.putInt(saveRef(value));
         buf.putInt(value.size());
         for (Object elem : value) {
             writeValue(elem);
@@ -124,7 +143,16 @@ public class EBONSerializer {
     }
 
     private void writeByteArray(byte[] value) {
+        buf.put(EBON.C_BINARY);
+        buf.putInt(saveRef(value));
         buf.putInt(value.length);
         buf.put(value);
+    }
+
+    private int saveRef(Object value) {
+        int ref = nextRef;
+        nextRef++;
+        refMap.put(value, ref);
+        return ref;
     }
 }

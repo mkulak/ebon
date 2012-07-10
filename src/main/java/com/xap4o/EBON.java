@@ -12,6 +12,7 @@ public class EBON {
     public static final byte C_BINARY = 8;
     public static final byte C_MAP = 9;
     public static final byte C_ENUM= 10;
+    public static final byte C_REF = 11;
 
 
     public static byte[] serialize(Object doc) {
