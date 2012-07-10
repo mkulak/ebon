@@ -1,15 +1,13 @@
 package com.xap4o;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class EBONSerializer {
-    private ByteBuffer buf = ByteBuffer.allocate(1024 * 100);
+    private ExtendableByteBuffer buf = new ExtendableByteBuffer();
     private Map<Object, Integer> refMap = new IdentityHashMap<Object, Integer>();
     private int nextRef;
 
