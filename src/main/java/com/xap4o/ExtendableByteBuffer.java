@@ -41,6 +41,10 @@ public class ExtendableByteBuffer {
     public int remaining() {
         return buf.remaining();
     }
+    
+    public void clear() {
+        buf.clear();
+    }
 
     public int position() {
         return buf.position();
