@@ -10,6 +10,12 @@ import static junit.framework.Assert.assertSame;
 
 public class BasicTest {
     @Test
+    public void testSmallBigCommand() {
+        EBONSerializer ser = new EBONSerializer();
+        ser.serialize("short");
+        ser.serialize("longlonglonglong");
+    }
+    @Test
     public void testMultipleSendReceive() {
         EBONSerializer ser = new EBONSerializer();
         EBONDeserializer des = new EBONDeserializer();
