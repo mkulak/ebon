@@ -10,6 +10,14 @@ import static junit.framework.Assert.assertSame;
 
 public class BasicTest {
     @Test
+    public void testMultipleSendReceive() {
+        EBONSerializer ser = new EBONSerializer();
+        EBONDeserializer des = new EBONDeserializer();
+        for(int i = 0; i < 10; i++) {
+            des.deserialize(ser.serialize(10));
+        }
+    }
+    @Test
     public void testInt() {
         Integer a = 1;
         Integer b = EBON.deserialize(EBON.serialize(a));
