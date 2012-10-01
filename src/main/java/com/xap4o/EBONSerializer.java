@@ -16,7 +16,7 @@ public class EBONSerializer {
         buf.flip();
         byte[] result = new byte[buf.remaining()];
         buf.get(result, 0, result.length);
-        buf.flip();
+        buf.clear();
         return result;
     }
 
