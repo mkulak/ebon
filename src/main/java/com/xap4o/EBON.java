@@ -14,6 +14,7 @@ public class EBON {
     public static final byte C_ENUM= 10;
     public static final byte C_REF = 11;
     public static final byte C_FLOAT = 12;
+    public static final byte C_SET = 13;
 
 
     public static byte[] serialize(Object doc) {

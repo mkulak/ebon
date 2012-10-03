@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class EBONSerializer {
     private ExtendableByteBuffer buf = new ExtendableByteBuffer();
@@ -59,6 +60,8 @@ public class EBONSerializer {
             writeList((List) value);
         } else if (Map.class.isAssignableFrom(clazz)) {
             writeMap((Map<Object, Object>) value);
+        } else if (Set.class.isAssignableFrom(clazz)) {
+            writeSet((Set<Object>) value);
         } else if (clazz.isEnum()) {
             writeEnum((Enum) value);
         } else {
@@ -132,6 +135,15 @@ public class EBONSerializer {
         for (Map.Entry<Object, Object> e : value.entrySet()) {
             writeValue(e.getKey());
             writeValue(e.getValue());
+        }
+    }
+
+    private void writeSet(Set<Object> value) {
+        buf.put(EBON.C_SET);
+        buf.putInt(saveRef(value));
+        buf.putInt(value.size());
+        for (Object o : value) {
+            writeValue(o);
         }
     }
 

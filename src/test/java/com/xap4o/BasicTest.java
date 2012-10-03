@@ -81,6 +81,18 @@ public class BasicTest {
     }
 
     @Test
+    public void testSet() {
+        Set a = new HashSet();
+        a.add(1);
+        a.add("foo-bar-baz");
+        a.add(Arrays.asList("abc", 90, 0.99999));
+        a.add("string value");
+        a.add(0);
+        Set b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
     public void testCustomClass() {
         Foo f = new Foo();
         f.a = 2;

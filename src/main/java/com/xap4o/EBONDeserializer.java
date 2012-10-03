@@ -3,10 +3,7 @@ package com.xap4o;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EBONDeserializer {
     private ByteBuffer buf;
@@ -42,6 +39,8 @@ public class EBONDeserializer {
                 return readList();
             case EBON.C_MAP:
                 return readMap();
+            case EBON.C_SET:
+                return readSet();
             case EBON.C_OBJECT:
                 return readObject();
             case EBON.C_ENUM:
@@ -146,6 +145,17 @@ public class EBONDeserializer {
         for (int i = 0; i < size; i++) {
             Object key = readValue();
             res.put(key, readValue());
+        }
+        return res;
+    }
+
+    private Set<Object> readSet() {
+        int ref = buf.getInt();
+        int size = buf.getInt();
+        Set<Object> res = new HashSet<Object>();
+        refMap.put(ref, res);
+        for (int i = 0; i < size; i++) {
+            res.add(readValue());
         }
         return res;
     }
