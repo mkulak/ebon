@@ -44,6 +44,9 @@ public class EBONSerializer {
         } else if (clazz == Double.class) {
             buf.put(EBON.C_DOUBLE);
             buf.putDouble((Double) value);
+        } else if (clazz == Float.class) {
+            buf.put(EBON.C_FLOAT);
+            buf.putFloat((Float) value);
         } else if (clazz == String.class) {
             writeString((String) value);
         } else if (clazz.isArray()) {

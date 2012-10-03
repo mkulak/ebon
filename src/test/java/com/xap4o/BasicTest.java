@@ -4,9 +4,7 @@ import org.junit.Test;
 
 import java.util.*;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertSame;
+import static junit.framework.Assert.*;
 
 public class BasicTest {
     @Test
@@ -27,6 +25,12 @@ public class BasicTest {
     public void testInt() {
         Integer a = 1;
         Integer b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a, b);
+    }
+    @Test
+    public void testFloat() {
+        Float a = 1f;
+        Float b = EBON.deserialize(EBON.serialize(a));
         assertEquals(a, b);
     }
 

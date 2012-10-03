@@ -32,6 +32,8 @@ public class EBONDeserializer {
                 return buf.getLong();
             case EBON.C_DOUBLE:
                 return buf.getDouble();
+            case EBON.C_FLOAT:
+                return buf.getFloat();
             case EBON.C_STRING:
                 return readStringImpl();
             case EBON.C_BINARY:

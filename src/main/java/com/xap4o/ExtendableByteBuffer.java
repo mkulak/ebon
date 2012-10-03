@@ -29,6 +29,11 @@ public class ExtendableByteBuffer {
         buf.putDouble(a);
     }
 
+    public void putFloat(float a) {
+        ensureFreeSpace(4);
+        buf.putFloat(a);
+    }
+
     public void put(byte[] value) {
         ensureFreeSpace(value.length);
         buf.put(value);
