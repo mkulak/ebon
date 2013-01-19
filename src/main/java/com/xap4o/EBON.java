@@ -16,6 +16,8 @@ public class EBON {
     public static final byte C_FLOAT = 12;
     public static final byte C_SET = 13;
 
+    public static final String CLASSNAME_MAP_KEY = "$className";
+
 
     public static byte[] serialize(Object doc) {
         return new EBONSerializer().serialize(doc);
@@ -23,5 +25,13 @@ public class EBON {
 
     public static <T> T deserialize(byte[] bytes) {
         return (T) new EBONDeserializer().deserialize(bytes);
+    }
+
+    public static byte[] serializeFromMap(Object doc) {
+        return new EBONSerializer(true).serialize(doc);
+    }
+
+    public static <T> T deserializeAsMap(byte[] bytes) {
+        return (T) new EBONDeserializer(true).deserialize(bytes);
     }
 }

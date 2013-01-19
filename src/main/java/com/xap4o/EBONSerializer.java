@@ -11,6 +11,15 @@ public class EBONSerializer {
     private ExtendableByteBuffer buf = new ExtendableByteBuffer();
     private Map<Object, Integer> refMap = new IdentityHashMap<Object, Integer>();
     private int nextRef;
+    private boolean handleMapsAsObjects;
+
+    public EBONSerializer() {
+        this(false);
+    }
+
+    public EBONSerializer(boolean handleMapsAsObjects) {
+        this.handleMapsAsObjects = handleMapsAsObjects;
+    }
 
     public byte[] serialize(Object doc) {
         writeValue(doc);
@@ -59,7 +68,7 @@ public class EBONSerializer {
         } else if (List.class.isAssignableFrom(clazz)) {
             writeList((List) value);
         } else if (Map.class.isAssignableFrom(clazz)) {
-            writeMap((Map<Object, Object>) value);
+            writeMap((Map) value);
         } else if (Set.class.isAssignableFrom(clazz)) {
             writeSet((Set<Object>) value);
         } else if (clazz.isEnum()) {
@@ -128,13 +137,34 @@ public class EBONSerializer {
         writeString(value.name());
     }
 
-    private void writeMap(Map<Object, Object> value) {
+    private void writeMap(Map map) {
+        if (handleMapsAsObjects && map.containsKey(EBON.CLASSNAME_MAP_KEY)) {
+            writeMapAsObject(map);
+        } else {
+            writeMapImpl(map);
+        }
+    }
+
+    private void writeMapImpl(Map<Object, Object> value) {
         buf.put(EBON.C_MAP);
         buf.putInt(saveRef(value));
         buf.putInt(value.size());
         for (Map.Entry<Object, Object> e : value.entrySet()) {
             writeValue(e.getKey());
             writeValue(e.getValue());
+        }
+    }
+
+    private void writeMapAsObject(Map<String, Object> value) {
+        buf.put(EBON.C_OBJECT);
+        buf.putInt(saveRef(value));
+        writeString((String) value.get(EBON.CLASSNAME_MAP_KEY));
+        buf.putInt(value.size() - 1);
+        for (Map.Entry<String, Object> e : value.entrySet()) {
+            if (!EBON.CLASSNAME_MAP_KEY.equals(e.getKey())) {
+                writeString(e.getKey());
+                writeValue(e.getValue());
+            }
         }
     }
 

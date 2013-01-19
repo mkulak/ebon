@@ -6,8 +6,17 @@ import java.nio.ByteBuffer;
 import java.util.*;
 
 public class EBONDeserializer {
+    private boolean handleObjectsAsMaps;
     private ByteBuffer buf;
     private Map<Integer, Object> refMap = new HashMap<Integer, Object>();
+
+    public EBONDeserializer() {
+        this(false);
+    }
+
+    public EBONDeserializer(boolean handleObjectsAsMaps) {
+        this.handleObjectsAsMaps = handleObjectsAsMaps;
+    }
 
     public Object deserialize(byte[] bytes) {
         buf = ByteBuffer.wrap(bytes);
@@ -72,6 +81,10 @@ public class EBONDeserializer {
     }
 
     private Object readObject() {
+        return handleObjectsAsMaps ? readObjectAsMap() : readObjectImpl();
+    }
+
+    private Object readObjectImpl() {
         int ref = buf.getInt();
         String className = readString();
         int fieldsCount = buf.getInt();
@@ -97,6 +110,21 @@ public class EBONDeserializer {
             } catch (Exception e) {
                 throw new EBONException("Cannot set field " + name + " for clazz " + className, e);
             }
+        }
+        return res;
+    }
+
+    private Object readObjectAsMap() {
+        int ref = buf.getInt();
+        String className = readString();
+        int fieldsCount = buf.getInt();
+        Map<String, Object> res = new HashMap<String, Object>();
+        res.put(EBON.CLASSNAME_MAP_KEY, className);
+        refMap.put(ref, res);
+        for (int i = 0; i < fieldsCount; i++) {
+            String name = readString();
+            Object value = readValue();
+            res.put(name, value);
         }
         return res;
     }

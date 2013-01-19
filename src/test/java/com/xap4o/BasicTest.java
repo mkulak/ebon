@@ -169,6 +169,32 @@ public class BasicTest {
         }
     }
 
+    @Test
+    public void testSerializeAsMap() {
+        Bar b1 = new Bar();
+        b1.d = Integer.MIN_VALUE;
+        b1.doubleField = Double.MAX_VALUE;
+        b1.ref = new Foo();
+        b1.ref.a = 32768;
+        b1.ref2 = new Bar();
+        b1.ref2.d = 42;
+        byte[] bytes = EBON.serialize(b1);
+        Map<String, Object> b1Map = EBON.deserializeAsMap(bytes);
+        assertEquals(Bar.class.getName(), b1Map.get(EBON.CLASSNAME_MAP_KEY));
+        assertEquals(b1.d, b1Map.get("d"));
+        assertEquals(b1.doubleField, b1Map.get("doubleField"));
+        Map<String, Object> refMap = (Map<String, Object>) b1Map.get("ref");
+        assertEquals(Foo.class.getName(), refMap.get(EBON.CLASSNAME_MAP_KEY));
+        assertEquals(b1.ref.a, refMap.get("a"));
+        Map<String, Object> ref2Map = (Map<String, Object>) b1Map.get("ref2");
+        assertEquals(Bar.class.getName(), ref2Map.get(EBON.CLASSNAME_MAP_KEY));
+        assertEquals(b1.ref2.d, ref2Map.get("d"));
+
+        byte[] bytes2 = EBON.serializeFromMap(b1Map);
+        Object b2 = EBON.deserialize(bytes2);
+        assertEquals(b1, b2);
+    }
+
 
     public static class Foo {
         public int a;
