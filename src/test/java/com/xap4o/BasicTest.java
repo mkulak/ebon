@@ -4,15 +4,33 @@ import org.junit.Test;
 
 import java.util.*;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertSame;
+import static junit.framework.Assert.*;
 
 public class BasicTest {
+    @Test
+    public void testSmallBigCommand() {
+        EBONSerializer ser = new EBONSerializer();
+        ser.serialize("short");
+        ser.serialize("longlonglonglong");
+    }
+    @Test
+    public void testMultipleSendReceive() {
+        EBONSerializer ser = new EBONSerializer();
+        EBONDeserializer des = new EBONDeserializer();
+        for(int i = 0; i < 10; i++) {
+            des.deserialize(ser.serialize(10));
+        }
+    }
     @Test
     public void testInt() {
         Integer a = 1;
         Integer b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a, b);
+    }
+    @Test
+    public void testFloat() {
+        Float a = 1f;
+        Float b = EBON.deserialize(EBON.serialize(a));
         assertEquals(a, b);
     }
 
@@ -60,6 +78,18 @@ public class BasicTest {
         for (Object key : a.keySet()) {
             assertEquals(a.get(key), b.get(key));
         }
+    }
+
+    @Test
+    public void testSet() {
+        Set a = new HashSet();
+        a.add(1);
+        a.add("foo-bar-baz");
+        a.add(Arrays.asList("abc", 90, 0.99999));
+        a.add("string value");
+        a.add(0);
+        Set b = EBON.deserialize(EBON.serialize(a));
+        assertEquals(a, b);
     }
 
     @Test

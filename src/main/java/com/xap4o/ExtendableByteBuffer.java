@@ -29,6 +29,11 @@ public class ExtendableByteBuffer {
         buf.putDouble(a);
     }
 
+    public void putFloat(float a) {
+        ensureFreeSpace(4);
+        buf.putFloat(a);
+    }
+
     public void put(byte[] value) {
         ensureFreeSpace(value.length);
         buf.put(value);
@@ -40,6 +45,10 @@ public class ExtendableByteBuffer {
 
     public int remaining() {
         return buf.remaining();
+    }
+    
+    public void clear() {
+        buf.clear();
     }
 
     public int position() {
