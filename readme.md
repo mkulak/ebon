@@ -8,7 +8,7 @@ To use as dependency in maven:
     <repository>
        <id>ebon-repo</id>
        <url>https://github.com/mkulak/ebon/raw/master/releases</url>
-   </repository>
+    </repository>
 
     <dependency>
         <groupId>com.xap4o</groupId>
