@@ -5,22 +5,9 @@ import org.junit.Test;
 import java.util.*;
 
 import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
 
 public class BasicTest {
-    @Test
-    public void testSmallBigCommand() {
-        EBONSerializer ser = new EBONSerializer();
-        ser.serialize("short");
-        ser.serialize("longlonglonglong");
-    }
-    @Test
-    public void testMultipleSendReceive() {
-        EBONSerializer ser = new EBONSerializer();
-        EBONDeserializer des = new EBONDeserializer();
-        for(int i = 0; i < 10; i++) {
-            des.deserialize(ser.serialize(10));
-        }
-    }
     @Test
     public void testInt() {
         Integer a = 1;
@@ -157,6 +144,31 @@ public class BasicTest {
         Node<Integer> newParent = EBON.deserialize(EBON.serialize(parent));
         assertEquals(parent, newParent);
     }
+
+    @Test
+    public void testShortCircuit() {
+        Node<Integer> node = new Node<Integer>(1);
+        node.parent = node;
+        Node<Integer> newNode = EBON.deserialize(EBON.serialize(node));
+        assertEquals(node, newNode);
+        assertSame(newNode, newNode.parent);
+    }
+
+    @Test
+    public void testSmallBigCommand() {
+        EBONSerializer ser = new EBONSerializer();
+        ser.serialize("short");
+        ser.serialize("longlonglonglong");
+    }
+    @Test
+    public void testMultipleSendReceive() {
+        EBONSerializer ser = new EBONSerializer();
+        EBONDeserializer des = new EBONDeserializer();
+        for(int i = 0; i < 10; i++) {
+            des.deserialize(ser.serialize(10));
+        }
+    }
+
 
     public static class Foo {
         public int a;
