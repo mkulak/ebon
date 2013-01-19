@@ -3,6 +3,19 @@ EBON (efficient binary object notation)
 
 Library for serializing/deserializing object graphs in simple binary format (much like BSON but without MongoDb stuff).
 
+To use as dependency in maven:
+    <repository>
+       <id>ebon-repo</id>
+       <url>https://github.com/mkulak/ebon/raw/master/releases</url>
+   </repository>
+
+    <dependency>
+        <groupId>com.xap4o</groupId>
+        <artifactId>ebon</artifactId>
+        <version>0.5</version>
+    </dependency>
+
+
 This is very early draft. Specification is subject to change with no backward compatibility.
 
 Actionscript implementation is [here](https://github.com/mkulak/ebon-as).
