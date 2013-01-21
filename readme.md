@@ -5,7 +5,28 @@ It was designed to represent graphs of simple [DTO](http://en.wikipedia.org/wiki
 (much like BSON but without MongoDb stuff).
 
 
-Spec: TODO
+EBON specification:
+Terminals
+    byte        1 byte (8-bits)
+    int32       4 bytes (32-bit signed integer) big-endian
+    int64       8 bytes (64-bit signed integer) big-endian
+    double64	8 bytes (64-bit IEEE 754 floating point)
+
+Non-terminals
+    entity       ::= null | boolean | int | long | double | string | list | map | object | byte_array | ref
+    null         ::= \x00                             Null
+    boolean      ::= \x01 \x01 | \x01 \x00            Boolean (1 for 'true' and 0 for 'false')
+    int          ::= \x02 int32                       Integer
+    long         ::= \x03 int64                       Long integer
+    double       ::= \x04 double64                    Double precision floating point value
+    string       ::= ref | \x05 int32 (byte*)         UTF-8 encoded string (int32 represents number of bytes in array)
+    byte_array   ::= ref | \x08 int32 (byte*)         Array of bytes
+    list         ::= ref | \x06 int32 (entity*)       List (int32 represents number of elements)
+    map          ::= ref | \x09 int32 (key_value*)    Map (int32 represents number of key-value pairs)
+    key_value    ::= entity entity                    Entity-key and entity-value
+    object       ::= ref | \x07 int32 (named_entity*) Object (int32 represents number of fields)
+    named_entity ::= string entity                    Name and entity
+    ref          ::= \x11 int32                       Reference to already serialized object
 
 This is very early draft. Specification is subject to change with no backward compatibility.
 
