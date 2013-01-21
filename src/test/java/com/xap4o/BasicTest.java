@@ -14,12 +14,6 @@ public class BasicTest {
         Integer b = EBON.deserialize(EBON.serialize(a));
         assertEquals(a, b);
     }
-    @Test
-    public void testFloat() {
-        Float a = 1f;
-        Float b = EBON.deserialize(EBON.serialize(a));
-        assertEquals(a, b);
-    }
 
     @Test
     public void testLong() {
@@ -65,18 +59,6 @@ public class BasicTest {
         for (Object key : a.keySet()) {
             assertEquals(a.get(key), b.get(key));
         }
-    }
-
-    @Test
-    public void testSet() {
-        Set a = new HashSet();
-        a.add(1);
-        a.add("foo-bar-baz");
-        a.add(Arrays.asList("abc", 90, 0.99999));
-        a.add("string value");
-        a.add(0);
-        Set b = EBON.deserialize(EBON.serialize(a));
-        assertEquals(a, b);
     }
 
     @Test
@@ -295,9 +277,6 @@ public class BasicTest {
         public List<Node> children = new LinkedList<Node>();
         public T value;
         public Node parent;
-
-        public Node() {
-        }
 
         public Node(T value) {
             this.value = value;

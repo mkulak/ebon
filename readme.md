@@ -1,9 +1,17 @@
 EBON (efficient binary object notation)
 =======================================
+EBON is a binary data representation format for network transfer and data storage.
+It was designed to represent graphs of simple [DTO](http://en.wikipedia.org/wiki/Data_transfer_object)-like objects
+(much like BSON but without MongoDb stuff).
 
-Library for serializing/deserializing object graphs in simple binary format (much like BSON but without MongoDb stuff).
 
-To use as dependency in maven:
+Spec: TODO
+
+This is very early draft. Specification is subject to change with no backward compatibility.
+
+This project is a java library for serializing/deserializing object graphs in EBON format.
+
+To include ebon for java as maven dependency:
 
     <repository>
        <id>ebon-repo</id>
@@ -13,16 +21,8 @@ To use as dependency in maven:
     <dependency>
         <groupId>com.xap4o</groupId>
         <artifactId>ebon</artifactId>
-        <version>0.5</version>
+        <version>0.7</version>
     </dependency>
-
-
-This is very early draft. Specification is subject to change with no backward compatibility.
-
-Actionscript implementation is [here](https://github.com/mkulak/ebon-as).
-
-Spec:
-TODO
 
 Serialization/deserialization is that simple:
 
@@ -51,6 +51,13 @@ Features:
 * can serialize graphs
 * java/actionscript support
 * no dinosaur legacy code
+* no Serializable or any other mandatory interface
+* declaring default constructors is not necessary
 
 Limitations:
-* Serialized objects must not contain array fields (except byte[])
+All serialized objects should contain only fields of type boolean, int, long, double, String, List, Map, byte[], enum and
+can contain objects of custom classes which themself comply with same restrictions. So byte, char, short, float, Set
+and arrays of any type are not supported. This is purely design decision in order to make lib more simple, clean and cross-language.
+Also current version depends on sun.reflect.ReflectionFactory which is internal class of Oracle JVM and may not be available on other JVMs.
+
+Actionscript 3 implementation is [here](https://github.com/mkulak/ebon-as).

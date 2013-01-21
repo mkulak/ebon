@@ -1,5 +1,8 @@
 package com.xap4o;
 
+import sun.reflect.ReflectionFactory;
+
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -9,7 +12,9 @@ public class Reflector {
     public static Object newInstance(String className) {
         try {
             Class<?> cls = Class.forName(className);
-            return cls.newInstance();
+            Constructor objCon = Object.class.getDeclaredConstructor();
+            Constructor con = ReflectionFactory.getReflectionFactory().newConstructorForSerialization(cls, objCon);
+            return con.newInstance();
         } catch (Exception e) {
             throw new EBONException("Cannot create new instance of " + className, e);
         }
