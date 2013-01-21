@@ -10,6 +10,7 @@ Spec: TODO
 This is very early draft. Specification is subject to change with no backward compatibility.
 
 This project is a java library for serializing/deserializing object graphs in EBON format.
+Library is released under [apache-2.0](http://www.apache.org/licenses/LICENSE-2.0) license.
 
 To include ebon for java as maven dependency:
 
