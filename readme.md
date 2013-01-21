@@ -6,6 +6,7 @@ It was designed to represent graphs of simple [DTO](http://en.wikipedia.org/wiki
 
 
 EBON specification:
+
     Terminals
         byte        1 byte (8-bits)
         int32       4 bytes (32-bit signed integer) big-endian
